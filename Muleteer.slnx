@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Muleteer/Muleteer.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Muleteer.Tests/Muleteer.Tests.csproj" />
+  </Folder>
+</Solution>
