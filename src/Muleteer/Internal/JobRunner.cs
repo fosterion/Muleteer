@@ -149,7 +149,7 @@ internal sealed class JobRunner<TContext, TJob, THandler> : BackgroundService
             var db = scope.ServiceProvider.GetRequiredService<TContext>();
             var handler = scope.ServiceProvider.GetRequiredService<THandler>();
 
-            var job = await JobStore.LoadAsync(handler.Load(db.Set<TJob>()), id, token, _abort.Token);
+            var job = await JobStore.LoadAsync(db.Set<TJob>(), id, token, _abort.Token);
             if (job is null)
             {
                 _logger.LeaseLost(_name, id);

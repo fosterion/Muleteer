@@ -4,7 +4,6 @@ public interface IJobHandler<TJob>
     where TJob : Job
 {
     IQueryable<TJob> Filter(IQueryable<TJob> jobs) => jobs;
-    IQueryable<TJob> Load(IQueryable<TJob> jobs) => jobs;
     Task<JobResult> HandleAsync(TJob job, CancellationToken cancellationToken);
 }
 
