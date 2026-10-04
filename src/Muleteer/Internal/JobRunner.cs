@@ -92,16 +92,20 @@ internal sealed class JobRunner<TContext, TJob, THandler> : BackgroundService
             }
 
             await slots.WaitAsync(ct);
+
             var free = 1;
+
             while (free < concurrency && slots.Wait(0))
                 free++;
 
             var started = 0;
             var hasMore = false;
+
             try
             {
                 var token = Guid.NewGuid();
                 var claim = await ClaimAsync(free, token, options, ct);
+
                 foreach (var id in claim.Ids)
                 {
                     _ = Task.Run(() => ProcessAsync(id, token, options, slots), CancellationToken.None);
@@ -135,9 +139,7 @@ internal sealed class JobRunner<TContext, TJob, THandler> : BackgroundService
         var filtered = handler.Filter(jobs);
         var now = _time.GetUtcNow();
 
-        var request = new ClaimRequest<TJob>(
-            db, ReferenceEquals(filtered, jobs) ? null : filtered, count, token, now, now + options.LeaseDuration);
-
+        var request = new ClaimRequest<TJob>(db, ReferenceEquals(filtered, jobs) ? null : filtered, count, token, now, now + options.LeaseDuration);
         return await _claimer.ClaimAsync(request, ct);
     }
 
@@ -150,6 +152,7 @@ internal sealed class JobRunner<TContext, TJob, THandler> : BackgroundService
             var handler = scope.ServiceProvider.GetRequiredService<THandler>();
 
             var job = await JobStore.LoadAsync(db.Set<TJob>(), id, token, _abort.Token);
+
             if (job is null)
             {
                 _logger.LeaseLost(_name, id);
@@ -162,6 +165,7 @@ internal sealed class JobRunner<TContext, TJob, THandler> : BackgroundService
             if (attempts > options.MaxAttempts)
             {
                 var exhausted = JobUpdate.Exhausted(attempts, _time.GetUtcNow());
+
                 if (!await JobStore.SettleAsync<TJob>(db, id, token, exhausted, CancellationToken.None))
                     _logger.LeaseLost(_name, id);
                 else
@@ -171,12 +175,12 @@ internal sealed class JobRunner<TContext, TJob, THandler> : BackgroundService
             }
 
             var leaseLeft = job.NextAttemptAt - _time.GetUtcNow();
-
             var (result, error) = await RunHandlerAsync(handler, job, leaseLeft);
 
             if (error is null)
             {
                 var outcome = JobUpdate.Completed(result, attempts, lastError, _time.GetUtcNow());
+
                 try
                 {
                     if (!await JobStore.CommitAsync(db, job, token, outcome, _abort.Token))

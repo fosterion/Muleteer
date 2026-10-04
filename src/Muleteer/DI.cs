@@ -21,8 +21,7 @@ public static class DI
         configure(builder);
 
         if (builder.Claimer is null)
-            throw new InvalidOperationException(
-                $"Choose the database of Muleteer jobs in {typeof(TContext).Name}: call UsePostgreSql().");
+            throw new InvalidOperationException($"Choose the database of Muleteer jobs in {typeof(TContext).Name}: call UsePostgreSql().");
 
         return services;
     }

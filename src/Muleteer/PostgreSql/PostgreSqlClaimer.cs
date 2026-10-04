@@ -31,6 +31,7 @@ internal sealed class PostgreSqlClaimer : IJobClaimer
         var sql = SqlFor(db, db.Model.FindEntityType(typeof(TJob))!);
 
         List<long>? candidates = null;
+
         if (request.Filter is { } filter)
         {
             candidates = await filter

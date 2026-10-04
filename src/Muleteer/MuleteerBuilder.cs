@@ -42,8 +42,10 @@ public class MuleteerBuilder<TContext>
             throw new InvalidOperationException($"{name} already has a handler.");
 
         var options = Services.AddOptions<JobOptions>(name);
+
         if (configure is not null)
             options.Configure(configure);
+
         options.BindConfiguration($"Muleteer:Jobs:{name}");
         options.ValidateOnStart();
 
